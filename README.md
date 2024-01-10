@@ -34,6 +34,7 @@ Além de eventuais correções e atualizações conforme a CBO for adicionando n
 ## Contatos
 
 Caso tenha alguma colaboração, não hesite de entrar em contato com algum dos autores listados abaixo:  
+LAM - lam.face@ufg.br  
 Sandro Eduardo Monsueto - monsueto@ufg.br  
 Felipe Pureza Cardoso - felpureza@cedeplar.ufmg.br  
 Alícia Araújo Amaral de Oliveira - aliciaaraujo@discente.ufg.br  
