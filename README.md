@@ -16,20 +16,20 @@ A matriz pode ser consultada [aqui](https://lam.face.ufg.br/).
 
 Este repositório é pensado para facilitar a divulgação dos códigos utilizados para a construção do índice e incentivamos a colaboração. Eles estão dispostos na pasta "Stata", que possui os seguintes arquivo:
 
+* Indice_de_Proximidade_abr_2024.do: **adicionar descrição**
 * CBO2002 - PerfilOcupacional 2023.csv: **adicionar descrição**
 * Classificar_Grupos_Tarefas.do: **adicionar descrição**
 * Correcao_portugues.do: **adicionar descrição**
-* Indice_de_Proximidade_nov_2023.do: **adicionar descrição**
 * Nomes_Ocupacoes.do: **adicionar descrição**
+* Quant_tarefas.do: **adicionar descrição**
 
-Inicialmente, os códigos foram programados em Stata, mas pretendemos seguir a mesma lógica de organização assim que formos incluindo outras linguagens de programação. 
+**É necessário que todos esses arquivos estejam na mesma pasta no momento de execução**
 
 ## Próximos passos
 
 Além de eventuais correções e atualizações conforme a CBO for adicionando novas ocupações, os próximos passos consistem em:
 
 * Adicionar códigos em R e Python;
-* Desenvolver o índice utilizando outras metodologias, como linguagem natural ou _machine learning_.
 
 ## Contatos
 
