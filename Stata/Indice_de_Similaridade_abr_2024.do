@@ -1,48 +1,52 @@
 /*
-ÍNDICE DE PROXIMIDADE TÉCNICA ENTRE OCUPAÇÕES
+ÍNDICE DE SIMILARIDADE TÉCNICA ENTRE OCUPAÇÕES
+	- Referência: MONSUETO, S.E.; CARDOSO, F.P.; OLIVEIRA, A.A.A. Um índice de similaridade entre ocupações da CBO. Textos para Discussão do Curso de Ciências Econômicas n. 101. Goiânia: Curso de Ciências Econômicas/FACE, 2024.
 	- CBO/RAIS
-Versão nov/2023:
+
+Versão Abr/2023:
  - Atualizada a base de dados da CBO para Jun/2023
- - Atualizada a classificação dos grupos de tarefas
- - Novas regras de correções especiais de verbos e objetos
  - Indice_Proximidade.DTA
+ - Requer Stata 11 ou superior
  */
 
-// 1) PREPARAÇÕES INICIAIS
+// 1) PREPARAÇÃO INICIAL DA PASTA DE TRABALHO
 * Configurar a pasta de trabalho
 clear
 cd "d:/Indice"
-**** Certifique-se que todos os arquivos abaixo estão nesta mesma pasta
-* Indice_de_Proximidade_nov_2023.do
-* Classificar_Grupos_Tarefas.do
-* Correcao_portugues.do
-* Nomes_Ocupacoes.do
-* ESTRUTURA CBO\CBO2002 - PerfilOcupacional 2023.csv
+*** Certifique-se que todos os arquivos abaixo estão nesta mesma pasta
+	* Indice_de_Similaridade_abr_2024.do (este arquivo) // Arquivo principal que faz o gerenciamento dos demais e cria o índice.
+	* Classificar_Grupos_Tarefas.do // Arquivo com a classificação das tarefas em 21 tipos e 3 grupos de natureza (cognitivas, rotineias e manuais).
+	* Correcao_portugues.do // Implementa correções ortográficas em verbos e sujeitos e padroniza para o singular
+	* Nomes_Ocupacoes.do // Contém os nomes das ocupações a 4 dígitos.
+	* ESTRUTURA CBO\CBO2002 - PerfilOcupacional 2023.csv // Arquivo original da CBO com a descrição das tarefas.
  
- 
+
 // 2) IMPORTAÇÃO DA BASE DE TAREFAS (Jun/2023)
 * Importar
 import delimited "CBO2002 - PerfilOcupacional 2023.csv", clear
-drop v10 v11
+capture drop v10 v11
 * Configurar ocupações a quatro dígitos (Famílias Ocupacionais)
-* Acrescentando um zero na frente das ocupações de famílias com três dígitos
+	* acrescentando um zero na frente das ocupações de famílias com três dígitos
 tostring cod_familia, gen(familia_str)
 gen zero = "0"
 egen ocupacao4d = concat(zero familia_str)
 replace ocupacao4d = familia_str if cod_familia>400
 drop zero
+* Numerando as ocupações
 encode ocupacao4d, gen(nocupacao)
+label var ocupacao4d "Ocupações a 4 dígitos - string"
+label var nocupacao "Ocupações a 4 dígitos - numeração"
+* Grupo principal de ocupações (ocupações a 2 dígitos)
+gen grupo_principal = substr(ocupacao4d,1,2)
+label var grupo_principal "Ocupações a 2 dígitos"
 
 
 // 3) CLASSIFICAR AS TAREFAS USANDO O NOME DA GRANDE ÁREA
 include "Classificar_Grupos_Tarefas.do"
-* Deixando uma linha por tarefa para cada ocupação de quatro dígitos
+* Deixando uma linha por tarefa (nome_atividade) para cada ocupação de quatro dígitos
 bys ocupacao4d tipo nome_atividade: gen j=_n
 drop if j>1
 drop j
-
-save "PREVIA DE TESTES.dta", replace
-use "PREVIA DE TESTES.dta", clear
 
 // 4) TRATAMENTO DAS DESCRIÇÕES DAS TAREFAS
 	/*
@@ -125,7 +129,6 @@ replace tarefa = strtrim(tarefa)
 replace tarefa = ustrregexra(tarefa,"COBRIRINFORMAÇOES", "COBRIR INFORMAÇOES",.)
 replace tarefa = subinword(tarefa, "RF", "RESPONSAVEL",.) // rf = responsável pela família
 replace tarefa = subinword(tarefa, "ACELERAR DESACELERAR IMAGENS", "ACELERAR IMAGENS",.)
-
 * Tarefas sem verbo (substituir pelo verbo da grande área)
 replace tarefa = "DEMONSTRAR INICIATIVA" if tarefa=="INICIATIVA"
 replace tarefa = "DEMONSTRAR DESTREZA MANUAL" if tarefa=="DESTREZA MANUAL"
@@ -200,9 +203,6 @@ drop tarefa1-conjugado objeto2
 * Correções gerais de português
 include "Correcao_portugues.do"
 
-save "PREVIA DE TESTES p2.dta", replace
-use "PREVIA DE TESTES p2.dta", clear
-
 * Eliminando pares de verbo+objeto repetido na mesma ocupação
 bys ocupacao4d tipo verbo objeto: gen j=_n
 drop if j>1
@@ -221,6 +221,9 @@ encode objeto, gen(nobjeto)
 gen espaco = " "
 egen tarefa_corrigida = concat(verbo espaco objeto)
 encode tarefa_corrigida, gen(ntarefa)
+label var nverbo "Código do Verbo"
+label var nobjeto "Código do Objeto"
+label var ntarefa "Código da Tarefa"
 
 * Descartando tarefas muito genéricas e comuns
 drop if verbo=="DEMONSTRAR"
@@ -230,13 +233,65 @@ drop if tarefa_corrigida=="TOMAR DECISAO"
 * Preparação final para salvar antes da criação do índice
 gen controle=_n
 sort nverbo nobjeto
-keep nome_atividade nverbo nobjeto ntarefa controle nocupacao ocupacao4d tipo grupo_tarefa
-gen familia = substr(ocupacao4d,1,2)
+keep nome_atividade nverbo nobjeto ntarefa controle nocupacao ocupacao4d grupo_principal tipo natureza
+compress
 save "Tarefas.dta", replace
 
 
+// 5) CRIANDO UM ARQUIVO ADICIONAL COM A QUANTIDADE DE TAREFAS DE CADA OCUPAÇÃO
+use "Tarefas.dta", clear
+tab tipo, gen(t)
+forvalues n=1/21{
+	bys nocupacao: egen qtipo`n' = total(t`n')
+}
+drop t1-t21
+tab natureza, gen(natureza)
+bys nocupacao: egen qcognitiva = total(natureza1)
+bys nocupacao: egen qmanual = total(natureza2)
+bys nocupacao: egen qrotineira = total(natureza3)
+drop natureza1-natureza3
+bys nocupacao: gen n=_n
+keep if n==1
+gen qtarefas = qcognitiva + qmanual + qrotineira
+* Etiquetas
+label var qtipo1 "Pesquisar, analisar, avaliar, desenvolver"
+label var qtipo2 "Desenhar, planejar, esboçar, projetar, formular"
+label var qtipo3 "Executar leis, interpretar leis/regras,"
+label var qtipo4 "Negociar, coordenar, fazer lobby, organizar, gerenciar"
+label var qtipo5 "Ensinar"
+label var qtipo6 "Vender, comprar, aconselhar clientes, fazer propaganda"
+label var qtipo7 "Entretenimento, apresentação"
+label var qtipo8 "Cálculo, contabilidade, controlar recursos financeiros"
+label var qtipo9 "Corrigir texto, corrigir dados, programar, registrar informações, organizar documentos"
+label var qtipo10 "Medições, controle de qualidade, executar ensaios"
+label var qtipo11 "Operar, controlar e preparar máquinas e equipamentos"
+label var qtipo12 "Reparar, renovar e reconstruir máquinas"
+label var qtipo13 "Cultivar"
+label var qtipo14 "Instalar máquinas, extrair, moldar materiais, cozinhar, construir"
+label var qtipo15 "Serviços de limpeza"
+label var qtipo16 "Embalar produtos, carregar, entregar."
+label var qtipo17 "Servir, acomodar, auxiliar, tratar/cuidar de outros"
+label var qtipo18 "Segurança"
+label var qtipo19 "Auxiliar, assessorar, apoiar"
+label var qtipo20 "Manual"
+label var qtipo21 "Interagir, agir, atuar"
+label var qcognitiva "Quant. de tarefas cognitivas"
+label var qmanual "Quant. de tarefas manuais"
+label var qrotineira "Quant. de tarefas rotineiras"
+label var qtarefas "Total de tarefas realizadas"
+* Nomes das ocupações
+gen ocupacao_o=ocupacao4d
+capture include "Nomes_Ocupacoes.do"
+drop ocupacao_o nome_d
+ren nome_o nome_ocupacao
+keep ocupacao4d nocupacao nome_ocupacao qtipo1-qtipo21 qcognitiva qmanual qrotineira nome_ocupacao qtarefas
+order ocupacao4d nocupacao nome_ocupacao
+compress
+sort ocupacao4d
+save "Quant_tarefas.dta", replace
 
-// 5) CRIANDO ARQUIVOS AUXILIARES
+
+// 6) CRIANDO ARQUIVOS AUXILIARES
 forvalues n = 1/619{
 	use "Tarefas.dta", clear
 	keep if nocupacao==`n'
@@ -248,22 +303,21 @@ forvalues n = 1/619{
 	use "Tarefas.dta", clear
 	keep if nocupacao==`n'
 	ren ocupacao4d ocupacao_d
-	sort familia tipo nverbo nobjeto
+	sort grupo_principal tipo nverbo nobjeto
 	save "ocup_F`n'.dta", replace
 }
 
-
-// 6) CALCULANDO O ÍNDICE COM OS PESOS
+// 7) CALCULANDO O ÍNDICE COM OS PESOS
 * Índices individuais
 forvalues ocup=1/619{
 	forvalues k=1/619{
 		
-		* FAMILIA + TIPO + VERBO + OBJETO = 1
+		* GRUPO PRINCIPAL + TIPO + VERBO + OBJETO = 1
 		use "Tarefas.dta", clear
 		drop controle
 		keep if nocupacao==`ocup'
-		sort familia tipo nverbo nobjeto
-		merge familia tipo nverbo nobjeto using "ocup_F`k'.dta"
+		sort grupo_principal tipo nverbo nobjeto
+		merge grupo_principal tipo nverbo nobjeto using "ocup_F`k'.dta"
 		egen ocupacao_o = mode(ocupacao4d)
 		drop if _merge==1
 		gen p1 = 1 if _merge==3
@@ -273,12 +327,12 @@ forvalues ocup=1/619{
 		keep if j==1
 		save "peso1.dta", replace
 
-		* FAMILIA + TIPO + VERBO = 0.5
+		* GRUPO PRINCIPAL + TIPO + VERBO = 0.5
 		use "Tarefas.dta", clear
 		drop controle
 		keep if nocupacao==`ocup'
-		sort familia tipo nverbo nobjeto
-		merge familia tipo nverbo using "ocup_F`k'.dta"
+		sort grupo_principal tipo nverbo nobjeto
+		merge grupo_principal tipo nverbo using "ocup_F`k'.dta"
 		egen ocupacao_o = mode(ocupacao4d)
 		drop if _merge==1
 		gen p2 = 0.5 if _merge==3
@@ -288,12 +342,12 @@ forvalues ocup=1/619{
 		keep if j==1
 		save "peso2.dta", replace
 		
-		* FAMILIA + TIPO = 0.25
+		* GRUPO PRINCIPAL + TIPO = 0.25
 		use "Tarefas.dta", clear
 		drop controle
 		keep if nocupacao==`ocup'
-		sort familia tipo nverbo nobjeto
-		merge familia tipo using "ocup_F`k'.dta"
+		sort grupo_principal tipo nverbo nobjeto
+		merge grupo_principal tipo using "ocup_F`k'.dta"
 		egen ocupacao_o = mode(ocupacao4d)
 		drop if _merge==1
 		gen p3 = 0.25 if _merge==3
@@ -335,6 +389,7 @@ forvalues ocup=1/619{
 		keep ocupacao_o ocupacao_d I
 		keep in 1
 		save "Ocupacao_`k'.dta", replace
+		display "Ocupação `k' da `ocup' de 619..."
 	}
 	clear
 	forvalues k=1/619{
@@ -351,11 +406,23 @@ forvalues ocup=1/619{
 * Nomes das ocupações
 include "Nomes_Ocupacoes.do"
 
+
+/*
+
+* Apagando arquivos auxiliares
+forvalues n=1/619{
+	capture erase ocup`n'.dta
+	capture erase ocup_F`n'.dta
+	capture erase Ocupacao_`n'.dta
+}
+
+*/
+
+
 // 7) SALVAR ARQUIVO FINAL
 label var ocupacao_d "Ocupação de Destino"
 label var ocupacao_o "Ocupação de Origem"
 label var IS "Índice de Similaridade"
 compress
 sort ocupacao_o ocupacao_d
-save "Indice_Similaridade.dta", replace
-
+save "Indice_Similaridade_abr_2024.dta", replace

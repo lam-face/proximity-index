@@ -1,5 +1,8 @@
 /*
 CLASSIFICAR AS TAREFAS SEGUNDO TIPO E NATUREZA
+- Usando a descrição de Grandes Áreas de Tarefas
+e agrupando em 21 tipos e em 3 naturezas
+- Ver Quadro 3 da referência
 */
 replace nome_grande_area  = ustrregexra( nome_grande_area ,`"""',"")
 gen tipo = .
@@ -4273,12 +4276,12 @@ replace tipo = 10 if nome_grande_area=="ZELAR PELO PATRIMÔNIO E INTERESSE PÚBL
 tab tipo,m
 
 * Agrupar segundo a natureza 
-gen grupo_tarefa = ""
-replace grupo_tarefa = "Cognitiva" if tipo<=7
-replace grupo_tarefa = "Rotineira" if tipo>=8 & tipo<=11
-replace grupo_tarefa = "Manual" if tipo>=12 & tipo<=18
-replace grupo_tarefa = "Cognitiva" if tipo==19
-replace grupo_tarefa = "Manual" if tipo==20
-replace grupo_tarefa = "Rotineira" if tipo==21
+gen natureza = ""
+replace natureza = "Cognitiva" if tipo<=7
+replace natureza = "Rotineira" if tipo>=8 & tipo<=11
+replace natureza = "Manual" if tipo>=12 & tipo<=18
+replace natureza = "Cognitiva" if tipo==19
+replace natureza = "Manual" if tipo==20
+replace natureza = "Rotineira" if tipo==21
 label var tipo "Tipo de tarefa realizada (cod_familia)"
-label var grupo_tarefa "Grupos (C/R/M)"
+label var natureza "Natureza da Tarefa (C/R/M)"
