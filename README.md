@@ -16,12 +16,12 @@ A matriz pode ser consultada [aqui](https://lam.face.ufg.br/).
 
 Este repositório é pensado para facilitar a divulgação dos códigos utilizados para a construção do índice e incentivamos a colaboração. Eles estão dispostos na pasta "Stata", que possui os seguintes arquivo:
 
-* Indice_de_Proximidade_abr_2024.do: **adicionar descrição**
-* CBO2002 - PerfilOcupacional 2023.csv: **adicionar descrição**
-* Classificar_Grupos_Tarefas.do: **adicionar descrição**
-* Correcao_portugues.do: **adicionar descrição**
-* Nomes_Ocupacoes.do: **adicionar descrição**
-* Quant_tarefas.do: **adicionar descrição**
+* Indice_de_Proximidade_abr_2024.do: Arquivo da extensão .do principal do repositório e é ele quem deve ser rodado para calcular o índice.
+* CBO2002 - PerfilOcupacional 2023.csv: Arquivo da extensão .csv que está organizado de acordo com as atividades executadas de cada ocupação. As colunas contêm os códigos do grande grupo, do subgrupo principal, do subgrupo, da família e da ocupação de acordo com a atualização da CBO de junho de 2023, bem como a sigla da grande área, o nome da grande área, o código da atividade e o nome da atividade.
+* Classificar_Grupos_Tarefas.do: Arquivo da extensão .do que classifica as tarefas descritas na CBO em 21 tipos e em 3 naturezas (cognitiva, manual e rotineira).
+* Correcao_portugues.do: Arquivo da extensão .do que executa as correções e padronizações de português, conforme descrito na seção 4 da nota técnica.
+* Nomes_Ocupacoes.do: Arquivo da extensão .do que atribui o nome às ocupações de destino e de origem na matriz de distância.
+* Quant_tarefas.do: Arquivo da extensão .dta que conta quantas tarefas cada ocupação tem, segregando para os 21 tipos e para as 3 naturezas (cognitiva, manual e rotineira).
 
 **É necessário que todos esses arquivos estejam na mesma pasta no momento de execução**
 
