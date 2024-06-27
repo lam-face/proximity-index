@@ -10,7 +10,7 @@ Para consultar os detalhes relativos à construção do indicador, foi elaborada
 
 Um dos produtos do trabalho é uma matriz de distância entre duas ocupações. Uma de suas considerações é que o nível de dificuldade para um profissional da ocupação A executar as tarefas do posto de trabalho B pode não ser o mesmo de B para a ocupação A. Dessa forma, a similaridade entre pares de ocuapações não é simétrica, caracterizando melhor a rigidez de mobilidade do mercado de trabalho e seus custos de transição entre postos de trabalho.
 
-A matriz pode ser consultada [aqui](https://lam.face.ufg.br/).
+A matriz pode ser consultada [aqui]([https://lam.face.ufg.br/](https://data.mendeley.com/datasets/vstnv3vdns/1).
 
 ## Organização do repositório
 
