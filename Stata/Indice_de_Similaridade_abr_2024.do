@@ -406,18 +406,14 @@ forvalues ocup=1/619{
 * Nomes das ocupações
 include "Nomes_Ocupacoes.do"
 
-
-/*
-
 * Apagando arquivos auxiliares
 forvalues n=1/619{
 	capture erase ocup`n'.dta
 	capture erase ocup_F`n'.dta
 	capture erase Ocupacao_`n'.dta
+	capture erase I_`n'.dta
+	capture erase peso`n'.dta
 }
-
-*/
-
 
 // 7) SALVAR ARQUIVO FINAL
 label var ocupacao_d "Ocupação de Destino"
