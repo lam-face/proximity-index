@@ -4,7 +4,7 @@
 
 O Índice de Similaridade é uma ferramenta que visa a avaliar a proximidade entre ocupações do mercado de trabalho brasileiro. A sua construção leva em consideração a descrição das tarefas realizadas das ocupações listadas na Classificação Brasileira de Ocupações (CBO) de 4 dígitos e busca sintetizar o quanto que duas ocupações podem ser consideradas próximas segundo a lista de tarefas esperadas por cada uma delas.
 
-Para consultar os detalhes relativos à construção do indicador, foi elaborada uma [nota técnica](https://lam.face.ufg.br/) explicando o passo a passo de sua elaboração.
+Para consultar os detalhes relativos à construção do indicador, foi elaborada uma [nota técnica](https://eco.face.ufg.br/n/182166-texto-para-discussao-n-101) explicando o passo a passo de sua elaboração.
 
 ## Matriz de distância entre ocupações
 
